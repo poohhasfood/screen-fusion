@@ -1,0 +1,69 @@
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
+
+@Controller
+public class MovieController {
+
+    @GetMapping("/")
+    public String home() {
+        return "index";
+    }
+
+    @PostMapping("/recommend")
+    public String recommendMovie(@RequestParam("movie1") String movie1,
+                                 @RequestParam("movie2") String movie2,
+                                 Model model) {
+        String recommendedMovie = null;
+        String recommendedGenre = null;
+
+        try (Connection connection = DriverManager.getConnection(
+                "jdbc:mysql://localhost:3306/movies", "root", "aadya sinha")) {
+
+            Statement statement = connection.createStatement();
+            ResultSet resultSet1 = statement.executeQuery(
+                    "SELECT genre FROM movie_entries WHERE movie_name = '" + movie1 + "'");
+            ResultSet resultSet2 = statement.executeQuery(
+                    "SELECT genre FROM movie_entries WHERE movie_name = '" + movie2 + "'");
+
+            String genre1 = null;
+            String genre2 = null;
+
+            if (resultSet1.next()) {
+                genre1 = resultSet1.getString("genre");
+            }
+
+            if (resultSet2.next()) {
+                genre2 = resultSet2.getString("genre");
+            }
+
+            if (genre1 != null && genre2 != null) {
+                ResultSet resultSet = statement.executeQuery(
+                        "SELECT * FROM movie_entries WHERE genre NOT IN ('" + genre1 + "', '" + genre2 + "') LIMIT 1");
+
+                if (resultSet.next()) {
+                    recommendedMovie = resultSet.getString("movie_name");
+                    recommendedGenre = resultSet.getString("genre");
+                } else {
+                    recommendedMovie = "No movie found with a genre other than the ones entered.";
+                }
+            } else {
+                recommendedMovie = "One or both of the movies not found.";
+            }
+
+        } catch (Exception e) {
+            recommendedMovie = "Error: " + e.getMessage();
+        }
+
+        model.addAttribute("recommendedMovie", recommendedMovie);
+        model.addAttribute("recommendedGenre", recommendedGenre);
+
+        return "recommendation";
+    }
+}

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Movie Recommendation</title>
+    <link rel="stylesheet" type="text/css" href="/styles.css">
+</head>
+<body>
+    <h1>Movie Recommendation</h1>
+    <form action="/recommend" method="post">
+        <label for="movie1">Movie 1:</label>
+        <input type="text" id="movie1" name="movie1"><br>
+        <label for="movie2">Movie 2:</label>
+        <input type="text" id="movie2" name="movie2"><br>
+        <input type="submit" value="Submit">
+    </form>
+    <div id="recommendation">
+        <h2>Recommended Movie:</h2>
+        <img src="/movie-poster.jpg" alt="Recommended Movie Poster">
+        <p id="movie-title"></p>
+        <p id="movie-genre"></p>
+    </div>
+</body>
+</html>
